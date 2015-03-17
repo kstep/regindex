@@ -6,3 +6,4 @@ authors = ["Konstantin Stepanov <me@kstep.me>"]
 
 [dependencies]
 regex = "*"
+regex_macros = "*"
