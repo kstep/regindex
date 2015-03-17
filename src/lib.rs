@@ -3,39 +3,27 @@
 extern crate regex;
 
 use std::ops::Index;
-use std::str::FromStr;
 use regex::Regex;
 
-pub struct ReIdx(Regex);
+pub struct ReIdx<'a>(&'a Regex);
 
-impl ReIdx {
-    pub fn new(s: &str) -> ReIdx {
-        ReIdx(Regex::new(s).unwrap())
-    }
-
-    pub fn from_regex(re: Regex) -> ReIdx {
+impl<'a> ReIdx<'a> {
+    pub fn from_regex(re: &'a Regex) -> ReIdx<'a> {
         ReIdx(re)
     }
 }
 
-impl FromStr for ReIdx {
-    type Err = regex::Error;
-    fn from_str(s: &str) -> Result<ReIdx, regex::Error> {
-        Regex::new(s).map(ReIdx)
-    }
-}
-
 trait ToReIdx {
-    fn to_regex_index(self) -> ReIdx;
+    fn to_regex_index<'a>(&'a self) -> ReIdx<'a>;
 }
 
 impl ToReIdx for Regex {
-    fn to_regex_index(self) -> ReIdx {
+    fn to_regex_index<'a>(&'a self) -> ReIdx<'a> {
         ReIdx(self)
     }
 }
 
-impl Index<ReIdx> for str {
+impl<'i> Index<ReIdx<'i>> for str {
     type Output = str;
     fn index<'a>(&'a self, index: &ReIdx) -> &'a str {
         if let Some((start, end)) = index.0.find(self) {
@@ -58,8 +46,8 @@ impl<T: ToReIdx> Index<T> for str {
 
 #[test]
 fn test_index_by_regex() {
-    let re = regex!("^ab+").to_regex_index();
-    assert_eq!("abb", &"abbcccdddd"[re]);
-    assert_eq!("", &"acccdddd"[re]);
-    assert_eq!("abb", &"abbcccdddd"[ReIdx::new("^ab+")]);
+    let re = regex!("^ab+");
+    let idx = re.to_regex_index();
+    assert_eq!("abb", &"abbcccdddd"[idx]);
+    assert_eq!("", &"acccdddd"[idx]);
 }
