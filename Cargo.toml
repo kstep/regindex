@@ -3,6 +3,11 @@
 name = "regindex"
 version = "0.1.0"
 authors = ["Konstantin Stepanov <me@kstep.me>"]
+description = "Index &str with regex in Rust (experimental)"
+repository = "https://github.com/kstep/regindex.git"
+homepage = "https://github.com/kstep/regindex"
+readme = "README.md"
+license = "MIT"
 
 [dependencies]
 regex = "*"
