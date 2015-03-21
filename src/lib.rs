@@ -4,15 +4,20 @@ extern crate regex;
 
 use std::ops::Index;
 use regex::Regex;
+use std::borrow::IntoCow;
 
 #[stable(since="0.1.0")]
 pub struct ReIdx(Regex);
 
-#[unstable]
 impl ReIdx {
     #[unstable]
-    pub fn new(re: Regex) -> ReIdx {
+    pub fn from_regex(re: Regex) -> ReIdx {
         ReIdx(re)
+    }
+
+    #[unstable]
+    pub fn new<'a, S: IntoCow<'a, str>>(s: S) -> Result<ReIdx, regex::Error> {
+        Regex::new(&s.into_cow()).map(|re| ReIdx(re))
     }
 }
 
@@ -27,9 +32,14 @@ impl Index<ReIdx> for str {
     }
 }
 
-#[test]
-fn test_index_by_regex() {
-    let re = ReIdx::new(regex!("^ab+"));
-    assert_eq!("abb", &"abbcccdddd"[re]);
-    assert_eq!("", &"acccdddd"[re]);
+#[cfg(test)]
+mod tests {
+    use super::ReIdx;
+
+    #[test]
+    fn test_index_by_regex() {
+        let re = ReIdx::new("^ab+").unwrap();
+        assert_eq!("abb", &"abbcccdddd"[re]);
+        assert_eq!("", &"acccdddd"[re]);
+    }
 }
