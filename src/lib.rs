@@ -32,6 +32,16 @@ impl Index<ReIdx> for str {
     }
 }
 
+impl Index<Result<ReIdx, regex::Error>> for str {
+    type Output = str;
+    fn index<'a>(&'a self, index: &Result<ReIdx, regex::Error>) -> &'a str {
+        match *index {
+            Ok(ref ri) => &self.index(ri),
+            Err(_) => &self[..0]
+        }
+    }
+}
+
 #[macro_export]
 macro_rules! ri {
     ($re:expr) => (ReIdx::new($re).unwrap())
@@ -43,9 +53,15 @@ mod tests {
 
     #[test]
     fn test_index_by_regex() {
-        let re = ReIdx::new("^ab+").unwrap();
+        let re = ReIdx::new("^ab+");
         assert_eq!("abb", &"abbcccdddd"[re]);
         assert_eq!("", &"acccdddd"[re]);
+    }
+
+    #[test]
+    fn test_invalid_regex() {
+        let re = ReIdx::new("^a(b+");
+        assert_eq!("", &"abbcccdddd"[re]);
     }
 
     #[test] fn test_index_with_macro() {
