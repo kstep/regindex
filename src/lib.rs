@@ -32,6 +32,11 @@ impl Index<ReIdx> for str {
     }
 }
 
+#[macro_export]
+macro_rules! ri {
+    ($re:expr) => (ReIdx::new($re).unwrap())
+}
+
 #[cfg(test)]
 mod tests {
     use super::ReIdx;
@@ -41,5 +46,9 @@ mod tests {
         let re = ReIdx::new("^ab+").unwrap();
         assert_eq!("abb", &"abbcccdddd"[re]);
         assert_eq!("", &"acccdddd"[re]);
+    }
+
+    #[test] fn test_index_with_macro() {
+        assert_eq!("cdddd", &"abbcccdddd"[ri!["cd+"]]);
     }
 }
